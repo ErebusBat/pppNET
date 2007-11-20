@@ -1,29 +1,50 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ppp.tests;
+using CommandLine.OptParse;
+using System.IO;
+using PerfectPaperPasswords.Core;
+using System.Security.Cryptography;
 
 namespace ppp
 {
 	static class Program
 	{
+		internal static CmdLineOptions Options = null;
+
 		static void Main(string[] args)
 		{
-			if(args.Length == 0)
+			Options = new CmdLineOptions();
+			Parser p = ParserFactory.BuildParser(Options);
+			p.OptStyle = OptStyle.Unix;
+			p.UnixShortOption = UnixShortOption.CollapseShort;
+			p.UnknownOptHandleType = UnknownOptHandleType.Warning;
+			p.DupOptHandleType = DupOptHandleType.Warning;
+			p.CaseSensitive = false;
+			p.OptionWarning += new WarningEventHandler(p_OptionWarning);
+			args = p.Parse(args);
+
+
+			if (Options.ShowHelp)
 			{
-				displayHelp();
+				p.PrintUsage(OptStyle.Unix, null, Console.Out, Console.WindowWidth);
 			}
-			else if(string.Compare(args[0], "-test", true) != -1)
+			else if (!string.IsNullOrEmpty(Options.DumpRandomFile))
 			{
-				runTests();
+				DumpRandom(Options.DumpRandomFile, Options.DumpRandomSize);
 			}
 
-			if(System.Diagnostics.Debugger.IsAttached)
+			if (System.Diagnostics.Debugger.IsAttached)
 			{
 				OutLine(string.Empty);
 				OutLine("Press any key...");
 				Console.ReadKey();
 			}
+		}
+
+		static void p_OptionWarning(Parser sender, OptionWarningEventArgs e)
+		{
+			Console.WriteLine(e.WarningMessage);
 		}
 
 		#region Interface Methods
@@ -44,15 +65,33 @@ namespace ppp
 			OutLine("--test	Run internal integrity tests.");
 		}
 
-		private static void runTests()
+		static void DumpRandom(string file, int bytes)
 		{
-			IntegrityTests tests = new IntegrityTests();
-			
-			//If we don't get an exception then they all passed.
-			tests.RunTests();
+			Console.WriteLine("Dumping random data to {0}", file);
+			using (FileStream fstream = new FileStream(file, FileMode.Create))
+			using (BinaryWriter writer = new BinaryWriter(fstream))
+			{
+				//use the built in CryptoRNG to grab our sequence key
+				byte[] sequenceKey = new byte[32];
+				RandomNumberGenerator rng = RandomNumberGenerator.Create();
+				rng.GetBytes(sequenceKey);
+				CryptoRandom crand = new CryptoRandom(Rijndael.Create(), sequenceKey);
 
-			OutLine(string.Empty);
-			OutLine("All tests passed!");
+				//Now we have our crand, dump the output
+				int bytesWritten = 0;
+				while(bytesWritten < bytes)
+				{
+					byte[] buffer = new byte[4096];
+					//crand.GetBytes(buffer);
+					rng.GetBytes(buffer);
+					writer.Write(buffer);
+
+					bytesWritten += buffer.Length;
+					if (bytesWritten % 245 == 0)
+						Console.Write(".");
+				}
+				Console.WriteLine("Done, wrote {0:0,0} bytes", bytesWritten);
+			}
 		}
 		#endregion //Operation Methods
 	}

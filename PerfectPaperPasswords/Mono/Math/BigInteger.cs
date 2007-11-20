@@ -41,14 +41,16 @@ using System.Security.Cryptography;
 using Mono.Math.Prime.Generator;
 using Mono.Math.Prime;
 
-namespace Mono.Math {
+namespace Mono.Math
+{
 
 #if INSIDE_CORLIB
 	internal
 #else
 	public
 #endif
-	class BigInteger {
+ class BigInteger
+	{
 
 		#region Data Storage
 
@@ -60,7 +62,7 @@ namespace Mono.Math {
 		/// <summary>
 		/// The data for this BigInteger
 		/// </summary>
-		uint [] data;
+		uint[] data;
 
 		#endregion
 
@@ -85,7 +87,7 @@ namespace Mono.Math {
 		///			</code>
 		///		</para>
 		/// </remarks>
-		internal static readonly uint [] smallPrimes = {
+		internal static readonly uint[] smallPrimes = {
 			2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
 			73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
 			157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233,
@@ -154,7 +156,8 @@ namespace Mono.Math {
 			5879, 5881, 5897, 5903, 5923, 5927, 5939, 5953, 5981, 5987
 		};
 
-		public enum Sign : int {
+		public enum Sign : int
+		{
 			Negative = -1,
 			Zero = 0,
 			Positive = 1
@@ -168,37 +171,37 @@ namespace Mono.Math {
 
 		#region Constructors
 
-		public BigInteger ()
+		public BigInteger()
 		{
-			data = new uint [DEFAULT_LEN];
+			data = new uint[DEFAULT_LEN];
 			this.length = DEFAULT_LEN;
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif          
-		public BigInteger (Sign sign, uint len) 
+		[CLSCompliant(false)]
+#endif
+		public BigInteger(Sign sign, uint len)
 		{
-			this.data = new uint [len];
+			this.data = new uint[len];
 			this.length = len;
 		}
 
-		public BigInteger (BigInteger bi)
+		public BigInteger(BigInteger bi)
 		{
-			this.data = (uint [])bi.data.Clone ();
+			this.data = (uint[])bi.data.Clone();
 			this.length = bi.length;
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif       
-		public BigInteger (BigInteger bi, uint len)
+		[CLSCompliant(false)]
+#endif
+		public BigInteger(BigInteger bi, uint len)
 		{
 
-			this.data = new uint [len];
+			this.data = new uint[len];
 
 			for (uint i = 0; i < bi.length; i++)
-				this.data [i] = bi.data [i];
+				this.data[i] = bi.data[i];
 
 			this.length = bi.length;
 		}
@@ -206,8 +209,8 @@ namespace Mono.Math {
 		#endregion
 
 		#region Conversions
-		
-		public BigInteger (byte [] inData)
+
+		public BigInteger(byte[] inData)
 		{
 			length = (uint)inData.Length >> 2;
 			int leftOver = inData.Length & 0x3;
@@ -215,124 +218,134 @@ namespace Mono.Math {
 			// length not multiples of 4
 			if (leftOver != 0) length++;
 
-			data = new uint [length];
+			data = new uint[length];
 
-			for (int i = inData.Length - 1, j = 0; i >= 3; i -= 4, j++) {
-				data [j] = (uint)(
-					(inData [i-3] << (3*8)) |
-					(inData [i-2] << (2*8)) |
-					(inData [i-1] << (1*8)) |
-					(inData [i])
+			for (int i = inData.Length - 1, j = 0; i >= 3; i -= 4, j++)
+			{
+				data[j] = (uint)(
+					(inData[i - 3] << (3 * 8)) |
+					(inData[i - 2] << (2 * 8)) |
+					(inData[i - 1] << (1 * 8)) |
+					(inData[i])
 					);
 			}
 
-			switch (leftOver) {
-			case 1: data [length-1] = (uint)inData [0]; break;
-			case 2: data [length-1] = (uint)((inData [0] << 8) | inData [1]); break;
-			case 3: data [length-1] = (uint)((inData [0] << 16) | (inData [1] << 8) | inData [2]); break;
+			switch (leftOver)
+			{
+				case 1: data[length - 1] = (uint)inData[0]; break;
+				case 2: data[length - 1] = (uint)((inData[0] << 8) | inData[1]); break;
+				case 3: data[length - 1] = (uint)((inData[0] << 16) | (inData[1] << 8) | inData[2]); break;
 			}
 
-			this.Normalize ();
+			this.Normalize();
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public BigInteger (uint [] inData)
+		[CLSCompliant(false)]
+#endif
+		public BigInteger(uint[] inData)
 		{
 			length = (uint)inData.Length;
 
-			data = new uint [length];
+			data = new uint[length];
 
 			for (int i = (int)length - 1, j = 0; i >= 0; i--, j++)
-				data [j] = inData [i];
+				data[j] = inData[i];
 
-			this.Normalize ();
+			this.Normalize();
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public BigInteger (uint ui)
+		[CLSCompliant(false)]
+#endif
+		public BigInteger(uint ui)
 		{
-			data = new uint [] {ui};
+			data = new uint[] { ui };
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public BigInteger (ulong ul)
+		[CLSCompliant(false)]
+#endif
+		public BigInteger(ulong ul)
 		{
-			data = new uint [2] { (uint)ul, (uint)(ul >> 32)};
+			data = new uint[2] { (uint)ul, (uint)(ul >> 32) };
 			length = 2;
 
-			this.Normalize ();
+			this.Normalize();
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static implicit operator BigInteger (uint value)
+		[CLSCompliant(false)]
+#endif
+		public static implicit operator BigInteger(uint value)
 		{
-			return (new BigInteger (value));
+			return (new BigInteger(value));
 		}
 
-		public static implicit operator BigInteger (int value)
+		public static implicit operator BigInteger(int value)
 		{
-			if (value < 0) throw new ArgumentOutOfRangeException ("value");
-			return (new BigInteger ((uint)value));
+			if (value < 0) throw new ArgumentOutOfRangeException("value");
+			return (new BigInteger((uint)value));
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static implicit operator BigInteger (ulong value)
+		[CLSCompliant(false)]
+#endif
+		public static implicit operator BigInteger(ulong value)
 		{
-			return (new BigInteger (value));
+			return (new BigInteger(value));
 		}
 
 		/* This is the BigInteger.Parse method I use. This method works
 		because BigInteger.ToString returns the input I gave to Parse. */
-		public static BigInteger Parse (string number) 
+		public static BigInteger Parse(string number)
 		{
 			if (number == null)
-				throw new ArgumentNullException ("number");
+				throw new ArgumentNullException("number");
 
 			int i = 0, len = number.Length;
 			char c;
 			bool digits_seen = false;
-			BigInteger val = new BigInteger (0);
-			if (number [i] == '+') {
+			BigInteger val = new BigInteger(0);
+			if (number[i] == '+')
+			{
 				i++;
-			} 
-			else if (number [i] == '-') {
-				throw new FormatException (WouldReturnNegVal);
+			}
+			else if (number[i] == '-')
+			{
+				throw new FormatException(WouldReturnNegVal);
 			}
 
-			for (; i < len; i++) {
-				c = number [i];
-				if (c == '\0') {
+			for (; i < len; i++)
+			{
+				c = number[i];
+				if (c == '\0')
+				{
 					i = len;
 					continue;
 				}
-				if (c >= '0' && c <= '9') {
+				if (c >= '0' && c <= '9')
+				{
 					val = val * 10 + (c - '0');
 					digits_seen = true;
-				} 
-				else {
-					if (Char.IsWhiteSpace (c)) {
-						for (i++; i < len; i++) {
-							if (!Char.IsWhiteSpace (number [i]))
-								throw new FormatException ();
+				}
+				else
+				{
+					if (Char.IsWhiteSpace(c))
+					{
+						for (i++; i < len; i++)
+						{
+							if (!Char.IsWhiteSpace(number[i]))
+								throw new FormatException();
 						}
 						break;
-					} 
+					}
 					else
-						throw new FormatException ();
+						throw new FormatException();
 				}
 			}
 			if (!digits_seen)
-				throw new FormatException ();
+				throw new FormatException();
 			return val;
 		}
 
@@ -340,108 +353,109 @@ namespace Mono.Math {
 
 		#region Operators
 
-		public static BigInteger operator + (BigInteger bi1, BigInteger bi2)
+		public static BigInteger operator +(BigInteger bi1, BigInteger bi2)
 		{
 			if (bi1 == 0)
-				return new BigInteger (bi2);
+				return new BigInteger(bi2);
 			else if (bi2 == 0)
-				return new BigInteger (bi1);
+				return new BigInteger(bi1);
 			else
-				return Kernel.AddSameSign (bi1, bi2);
+				return Kernel.AddSameSign(bi1, bi2);
 		}
 
-		public static BigInteger operator - (BigInteger bi1, BigInteger bi2)
+		public static BigInteger operator -(BigInteger bi1, BigInteger bi2)
 		{
 			if (bi2 == 0)
-				return new BigInteger (bi1);
+				return new BigInteger(bi1);
 
 			if (bi1 == 0)
-				throw new ArithmeticException (WouldReturnNegVal);
+				throw new ArithmeticException(WouldReturnNegVal);
 
-			switch (Kernel.Compare (bi1, bi2)) {
+			switch (Kernel.Compare(bi1, bi2))
+			{
 
 				case Sign.Zero:
 					return 0;
 
 				case Sign.Positive:
-					return Kernel.Subtract (bi1, bi2);
+					return Kernel.Subtract(bi1, bi2);
 
 				case Sign.Negative:
-					throw new ArithmeticException (WouldReturnNegVal);
+					throw new ArithmeticException(WouldReturnNegVal);
 				default:
-					throw new Exception ();
+					throw new Exception();
 			}
 		}
 
-		public static int operator % (BigInteger bi, int i)
+		public static int operator %(BigInteger bi, int i)
 		{
 			if (i > 0)
-				return (int)Kernel.DwordMod (bi, (uint)i);
+				return (int)Kernel.DwordMod(bi, (uint)i);
 			else
-				return -(int)Kernel.DwordMod (bi, (uint)-i);
+				return -(int)Kernel.DwordMod(bi, (uint)-i);
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static uint operator % (BigInteger bi, uint ui)
+		[CLSCompliant(false)]
+#endif
+		public static uint operator %(BigInteger bi, uint ui)
 		{
-			return Kernel.DwordMod (bi, (uint)ui);
+			return Kernel.DwordMod(bi, (uint)ui);
 		}
 
-		public static BigInteger operator % (BigInteger bi1, BigInteger bi2)
+		public static BigInteger operator %(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.multiByteDivide (bi1, bi2)[1];
+			return Kernel.multiByteDivide(bi1, bi2)[1];
 		}
 
-		public static BigInteger operator / (BigInteger bi, int i)
+		public static BigInteger operator /(BigInteger bi, int i)
 		{
 			if (i > 0)
-				return Kernel.DwordDiv (bi, (uint)i);
+				return Kernel.DwordDiv(bi, (uint)i);
 
-			throw new ArithmeticException (WouldReturnNegVal);
+			throw new ArithmeticException(WouldReturnNegVal);
 		}
 
-		public static BigInteger operator / (BigInteger bi1, BigInteger bi2)
+		public static BigInteger operator /(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.multiByteDivide (bi1, bi2)[0];
+			return Kernel.multiByteDivide(bi1, bi2)[0];
 		}
 
-		public static BigInteger operator * (BigInteger bi1, BigInteger bi2)
+		public static BigInteger operator *(BigInteger bi1, BigInteger bi2)
 		{
 			if (bi1 == 0 || bi2 == 0) return 0;
 
 			//
 			// Validate pointers
 			//
-			if (bi1.data.Length < bi1.length) throw new IndexOutOfRangeException ("bi1 out of range");
-			if (bi2.data.Length < bi2.length) throw new IndexOutOfRangeException ("bi2 out of range");
+			if (bi1.data.Length < bi1.length) throw new IndexOutOfRangeException("bi1 out of range");
+			if (bi2.data.Length < bi2.length) throw new IndexOutOfRangeException("bi2 out of range");
 
-			BigInteger ret = new BigInteger (Sign.Positive, bi1.length + bi2.length);
+			BigInteger ret = new BigInteger(Sign.Positive, bi1.length + bi2.length);
 
-			Kernel.Multiply (bi1.data, 0, bi1.length, bi2.data, 0, bi2.length, ret.data, 0);
+			Kernel.Multiply(bi1.data, 0, bi1.length, bi2.data, 0, bi2.length, ret.data, 0);
 
-			ret.Normalize ();
+			ret.Normalize();
 			return ret;
 		}
 
-		public static BigInteger operator * (BigInteger bi, int i)
+		public static BigInteger operator *(BigInteger bi, int i)
 		{
-			if (i < 0) throw new ArithmeticException (WouldReturnNegVal);
+			if (i < 0) throw new ArithmeticException(WouldReturnNegVal);
 			if (i == 0) return 0;
-			if (i == 1) return new BigInteger (bi);
+			if (i == 1) return new BigInteger(bi);
 
-			return Kernel.MultiplyByDword (bi, (uint)i);
+			return Kernel.MultiplyByDword(bi, (uint)i);
 		}
 
-		public static BigInteger operator << (BigInteger bi1, int shiftVal)
+		public static BigInteger operator <<(BigInteger bi1, int shiftVal)
 		{
-			return Kernel.LeftShift (bi1, shiftVal);
+			return Kernel.LeftShift(bi1, shiftVal);
 		}
 
-		public static BigInteger operator >> (BigInteger bi1, int shiftVal)
+		public static BigInteger operator >>(BigInteger bi1, int shiftVal)
 		{
-			return Kernel.RightShift (bi1, shiftVal);
+			return Kernel.RightShift(bi1, shiftVal);
 		}
 
 		#endregion
@@ -450,50 +464,50 @@ namespace Mono.Math {
 
 		// with names suggested by FxCop 1.30
 
-		public static BigInteger Add (BigInteger bi1, BigInteger bi2) 
+		public static BigInteger Add(BigInteger bi1, BigInteger bi2)
 		{
 			return (bi1 + bi2);
 		}
 
-		public static BigInteger Subtract (BigInteger bi1, BigInteger bi2) 
+		public static BigInteger Subtract(BigInteger bi1, BigInteger bi2)
 		{
 			return (bi1 - bi2);
 		}
 
-		public static int Modulus (BigInteger bi, int i) 
+		public static int Modulus(BigInteger bi, int i)
 		{
 			return (bi % i);
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static uint Modulus (BigInteger bi, uint ui) 
+		[CLSCompliant(false)]
+#endif
+		public static uint Modulus(BigInteger bi, uint ui)
 		{
 			return (bi % ui);
 		}
 
-		public static BigInteger Modulus (BigInteger bi1, BigInteger bi2) 
+		public static BigInteger Modulus(BigInteger bi1, BigInteger bi2)
 		{
 			return (bi1 % bi2);
 		}
 
-		public static BigInteger Divid (BigInteger bi, int i) 
+		public static BigInteger Divid(BigInteger bi, int i)
 		{
 			return (bi / i);
 		}
 
-		public static BigInteger Divid (BigInteger bi1, BigInteger bi2) 
+		public static BigInteger Divid(BigInteger bi1, BigInteger bi2)
 		{
 			return (bi1 / bi2);
 		}
 
-		public static BigInteger Multiply (BigInteger bi1, BigInteger bi2) 
+		public static BigInteger Multiply(BigInteger bi1, BigInteger bi2)
 		{
 			return (bi1 * bi2);
 		}
 
-		public static BigInteger Multiply (BigInteger bi, int i) 
+		public static BigInteger Multiply(BigInteger bi, int i)
 		{
 			return (bi * i);
 		}
@@ -502,10 +516,12 @@ namespace Mono.Math {
 
 		#region Random
 		private static RandomNumberGenerator rng;
-		private static RandomNumberGenerator Rng {
-			get {
+		private static RandomNumberGenerator Rng
+		{
+			get
+			{
 				if (rng == null)
-					rng = RandomNumberGenerator.Create ();
+					rng = RandomNumberGenerator.Create();
 				return rng;
 			}
 		}
@@ -516,7 +532,7 @@ namespace Mono.Math {
 		/// <param name="bits">The number of bits for the new number.</param>
 		/// <param name="rng">A random number generator to use to obtain the bits.</param>
 		/// <returns>A random number of the specified length.</returns>
-		public static BigInteger GenerateRandom (int bits, RandomNumberGenerator rng)
+		public static BigInteger GenerateRandom(int bits, RandomNumberGenerator rng)
 		{
 			int dwords = bits >> 5;
 			int remBits = bits & 0x1F;
@@ -524,23 +540,24 @@ namespace Mono.Math {
 			if (remBits != 0)
 				dwords++;
 
-			BigInteger ret = new BigInteger (Sign.Positive, (uint)dwords + 1);
-			byte [] random = new byte [dwords << 2];
+			BigInteger ret = new BigInteger(Sign.Positive, (uint)dwords + 1);
+			byte[] random = new byte[dwords << 2];
 
-			rng.GetBytes (random);
-			Buffer.BlockCopy (random, 0, ret.data, 0, (int)dwords << 2);
+			rng.GetBytes(random);
+			Buffer.BlockCopy(random, 0, ret.data, 0, (int)dwords << 2);
 
-			if (remBits != 0) {
-				uint mask = (uint)(0x01 << (remBits-1));
-				ret.data [dwords-1] |= mask;
+			if (remBits != 0)
+			{
+				uint mask = (uint)(0x01 << (remBits - 1));
+				ret.data[dwords - 1] |= mask;
 
 				mask = (uint)(0xFFFFFFFF >> (32 - remBits));
-				ret.data [dwords-1] &= mask;
+				ret.data[dwords - 1] &= mask;
 			}
 			else
-				ret.data [dwords-1] |= 0x80000000;
+				ret.data[dwords - 1] |= 0x80000000;
 
-			ret.Normalize ();
+			ret.Normalize();
 			return ret;
 		}
 
@@ -549,67 +566,69 @@ namespace Mono.Math {
 		/// </summary>
 		/// <param name="bits">The number of bits for the new number.</param>
 		/// <returns>A random number of the specified length.</returns>
-		public static BigInteger GenerateRandom (int bits)
+		public static BigInteger GenerateRandom(int bits)
 		{
-			return GenerateRandom (bits, Rng);
+			return GenerateRandom(bits, Rng);
 		}
 
 		/// <summary>
 		/// Randomizes the bits in "this" from the specified RNG.
 		/// </summary>
 		/// <param name="rng">A RNG.</param>
-		public void Randomize (RandomNumberGenerator rng)
+		public void Randomize(RandomNumberGenerator rng)
 		{
 			if (this == 0)
 				return;
 
-			int bits = this.BitCount ();
+			int bits = this.BitCount();
 			int dwords = bits >> 5;
 			int remBits = bits & 0x1F;
 
 			if (remBits != 0)
 				dwords++;
 
-			byte [] random = new byte [dwords << 2];
+			byte[] random = new byte[dwords << 2];
 
-			rng.GetBytes (random);
-			Buffer.BlockCopy (random, 0, data, 0, (int)dwords << 2);
+			rng.GetBytes(random);
+			Buffer.BlockCopy(random, 0, data, 0, (int)dwords << 2);
 
-			if (remBits != 0) {
-				uint mask = (uint)(0x01 << (remBits-1));
-				data [dwords-1] |= mask;
+			if (remBits != 0)
+			{
+				uint mask = (uint)(0x01 << (remBits - 1));
+				data[dwords - 1] |= mask;
 
 				mask = (uint)(0xFFFFFFFF >> (32 - remBits));
-				data [dwords-1] &= mask;
+				data[dwords - 1] &= mask;
 			}
 
 			else
-				data [dwords-1] |= 0x80000000;
+				data[dwords - 1] |= 0x80000000;
 
-			Normalize ();
+			Normalize();
 		}
 
 		/// <summary>
 		/// Randomizes the bits in "this" from the default RNG.
 		/// </summary>
-		public void Randomize ()
+		public void Randomize()
 		{
-			Randomize (Rng);
+			Randomize(Rng);
 		}
 
 		#endregion
 
 		#region Bitwise
 
-		public int BitCount ()
+		public int BitCount()
 		{
-			this.Normalize ();
+			this.Normalize();
 
-			uint value = data [length - 1];
+			uint value = data[length - 1];
 			uint mask = 0x80000000;
 			uint bits = 32;
 
-			while (bits > 0 && (value & mask) == 0) {
+			while (bits > 0 && (value & mask) == 0)
+			{
 				bits--;
 				mask >>= 1;
 			}
@@ -624,87 +643,90 @@ namespace Mono.Math {
 		/// <param name="bitNum">The bit to test. The least significant bit is 0.</param>
 		/// <returns>True if bitNum is set to 1, else false.</returns>
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public bool TestBit (uint bitNum)
+		[CLSCompliant(false)]
+#endif
+		public bool TestBit(uint bitNum)
 		{
 			uint bytePos = bitNum >> 5;             // divide by 32
 			byte bitPos = (byte)(bitNum & 0x1F);    // get the lowest 5 bits
 
 			uint mask = (uint)1 << bitPos;
-			return ((this.data [bytePos] & mask) != 0);
+			return ((this.data[bytePos] & mask) != 0);
 		}
 
-		public bool TestBit (int bitNum)
+		public bool TestBit(int bitNum)
 		{
-			if (bitNum < 0) throw new IndexOutOfRangeException ("bitNum out of range");
+			if (bitNum < 0) throw new IndexOutOfRangeException("bitNum out of range");
 
 			uint bytePos = (uint)bitNum >> 5;             // divide by 32
 			byte bitPos = (byte)(bitNum & 0x1F);    // get the lowest 5 bits
 
 			uint mask = (uint)1 << bitPos;
-			return ((this.data [bytePos] | mask) == this.data [bytePos]);
+			return ((this.data[bytePos] | mask) == this.data[bytePos]);
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public void SetBit (uint bitNum)
+		[CLSCompliant(false)]
+#endif
+		public void SetBit(uint bitNum)
 		{
-			SetBit (bitNum, true);
+			SetBit(bitNum, true);
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public void ClearBit (uint bitNum)
+		[CLSCompliant(false)]
+#endif
+		public void ClearBit(uint bitNum)
 		{
-			SetBit (bitNum, false);
+			SetBit(bitNum, false);
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public void SetBit (uint bitNum, bool value)
+		[CLSCompliant(false)]
+#endif
+		public void SetBit(uint bitNum, bool value)
 		{
 			uint bytePos = bitNum >> 5;             // divide by 32
 
-			if (bytePos < this.length) {
+			if (bytePos < this.length)
+			{
 				uint mask = (uint)1 << (int)(bitNum & 0x1F);
 				if (value)
-					this.data [bytePos] |= mask;
+					this.data[bytePos] |= mask;
 				else
-					this.data [bytePos] &= ~mask;
+					this.data[bytePos] &= ~mask;
 			}
 		}
 
-		public int LowestSetBit ()
+		public int LowestSetBit()
 		{
 			if (this == 0) return -1;
 			int i = 0;
-			while (!TestBit (i)) i++;
+			while (!TestBit(i)) i++;
 			return i;
 		}
 
-		public byte[] GetBytes ()
+		public byte[] GetBytes()
 		{
-			if (this == 0) return new byte [1];
+			if (this == 0) return new byte[1];
 
-			int numBits = BitCount ();
+			int numBits = BitCount();
 			int numBytes = numBits >> 3;
 			if ((numBits & 0x7) != 0)
 				numBytes++;
 
-			byte [] result = new byte [numBytes];
+			byte[] result = new byte[numBytes];
 
 			int numBytesInWord = numBytes & 0x3;
 			if (numBytesInWord == 0) numBytesInWord = 4;
 
 			int pos = 0;
-			for (int i = (int)length - 1; i >= 0; i--) {
-				uint val = data [i];
-				for (int j = numBytesInWord - 1; j >= 0; j--) {
-					result [pos+j] = (byte)(val & 0xFF);
+			for (int i = (int)length - 1; i >= 0; i--)
+			{
+				uint val = data[i];
+				for (int j = numBytesInWord - 1; j >= 0; j--)
+				{
+					result[pos + j] = (byte)(val & 0xFF);
 					val >>= 8;
 				}
 				pos += numBytesInWord;
@@ -718,66 +740,66 @@ namespace Mono.Math {
 		#region Compare
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static bool operator == (BigInteger bi1, uint ui)
+		[CLSCompliant(false)]
+#endif
+		public static bool operator ==(BigInteger bi1, uint ui)
 		{
-			if (bi1.length != 1) bi1.Normalize ();
-			return bi1.length == 1 && bi1.data [0] == ui;
+			if (bi1.length != 1) bi1.Normalize();
+			return bi1.length == 1 && bi1.data[0] == ui;
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public static bool operator != (BigInteger bi1, uint ui)
+		[CLSCompliant(false)]
+#endif
+		public static bool operator !=(BigInteger bi1, uint ui)
 		{
-			if (bi1.length != 1) bi1.Normalize ();
-			return !(bi1.length == 1 && bi1.data [0] == ui);
+			if (bi1.length != 1) bi1.Normalize();
+			return !(bi1.length == 1 && bi1.data[0] == ui);
 		}
 
-		public static bool operator == (BigInteger bi1, BigInteger bi2)
+		public static bool operator ==(BigInteger bi1, BigInteger bi2)
 		{
 			// we need to compare with null
 			if ((bi1 as object) == (bi2 as object))
 				return true;
 			if (null == bi1 || null == bi2)
 				return false;
-			return Kernel.Compare (bi1, bi2) == 0;
+			return Kernel.Compare(bi1, bi2) == 0;
 		}
 
-		public static bool operator != (BigInteger bi1, BigInteger bi2)
+		public static bool operator !=(BigInteger bi1, BigInteger bi2)
 		{
 			// we need to compare with null
 			if ((bi1 as object) == (bi2 as object))
 				return false;
 			if (null == bi1 || null == bi2)
 				return true;
-			return Kernel.Compare (bi1, bi2) != 0;
+			return Kernel.Compare(bi1, bi2) != 0;
 		}
 
-		public static bool operator > (BigInteger bi1, BigInteger bi2)
+		public static bool operator >(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.Compare (bi1, bi2) > 0;
+			return Kernel.Compare(bi1, bi2) > 0;
 		}
 
-		public static bool operator < (BigInteger bi1, BigInteger bi2)
+		public static bool operator <(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.Compare (bi1, bi2) < 0;
+			return Kernel.Compare(bi1, bi2) < 0;
 		}
 
-		public static bool operator >= (BigInteger bi1, BigInteger bi2)
+		public static bool operator >=(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.Compare (bi1, bi2) >= 0;
+			return Kernel.Compare(bi1, bi2) >= 0;
 		}
 
-		public static bool operator <= (BigInteger bi1, BigInteger bi2)
+		public static bool operator <=(BigInteger bi1, BigInteger bi2)
 		{
-			return Kernel.Compare (bi1, bi2) <= 0;
+			return Kernel.Compare(bi1, bi2) <= 0;
 		}
 
-		public Sign Compare (BigInteger bi)
+		public Sign Compare(BigInteger bi)
 		{
-			return Kernel.Compare (this, bi);
+			return Kernel.Compare(this, bi);
 		}
 
 		#endregion
@@ -785,33 +807,34 @@ namespace Mono.Math {
 		#region Formatting
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public string ToString (uint radix)
+		[CLSCompliant(false)]
+#endif
+		public string ToString(uint radix)
 		{
-			return ToString (radix, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+			return ToString(radix, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 		}
 
 #if !INSIDE_CORLIB
-		[CLSCompliant (false)]
-#endif 
-		public string ToString (uint radix, string characterSet)
+		[CLSCompliant(false)]
+#endif
+		public string ToString(uint radix, string characterSet)
 		{
 			if (characterSet.Length < radix)
-				throw new ArgumentException ("charSet length less than radix", "characterSet");
+				throw new ArgumentException("charSet length less than radix", "characterSet");
 			if (radix == 1)
-				throw new ArgumentException ("There is no such thing as radix one notation", "radix");
+				throw new ArgumentException("There is no such thing as radix one notation", "radix");
 
 			if (this == 0) return "0";
 			if (this == 1) return "1";
 
 			string result = "";
 
-			BigInteger a = new BigInteger (this);
+			BigInteger a = new BigInteger(this);
 
-			while (a != 0) {
-				uint rem = Kernel.SingleByteDivideInPlace (a, radix);
-				result = characterSet [(int) rem] + result;
+			while (a != 0)
+			{
+				uint rem = Kernel.SingleByteDivideInPlace(a, radix);
+				result = characterSet[(int)rem] + result;
 			}
 
 			return result;
@@ -826,42 +849,42 @@ namespace Mono.Math {
 		///     uints used in data and by setting the sign to Sign.Zero if the
 		///     value of this is 0.
 		/// </summary>
-		private void Normalize ()
+		private void Normalize()
 		{
 			// Normalize length
-			while (length > 0 && data [length-1] == 0) length--;
+			while (length > 0 && data[length - 1] == 0) length--;
 
 			// Check for zero
 			if (length == 0)
 				length++;
 		}
 
-		public void Clear () 
+		public void Clear()
 		{
-			for (int i=0; i < length; i++)
-				data [i] = 0x00;
+			for (int i = 0; i < length; i++)
+				data[i] = 0x00;
 		}
 
 		#endregion
 
 		#region Object Impl
 
-		public override int GetHashCode ()
+		public override int GetHashCode()
 		{
 			uint val = 0;
 
 			for (uint i = 0; i < this.length; i++)
-				val ^= this.data [i];
+				val ^= this.data[i];
 
 			return (int)val;
 		}
 
-		public override string ToString ()
+		public override string ToString()
 		{
-			return ToString (10);
+			return ToString(10);
 		}
 
-		public override bool Equals (object o)
+		public override bool Equals(object o)
 		{
 			if (o == null)
 				return false;
@@ -871,39 +894,41 @@ namespace Mono.Math {
 			BigInteger bi = o as BigInteger;
 			if (bi == null)
 				return false;
-			
-			return Kernel.Compare (this, bi) == 0;
+
+			return Kernel.Compare(this, bi) == 0;
 		}
 
 		#endregion
 
 		#region Number Theory
 
-		public BigInteger GCD (BigInteger bi)
+		public BigInteger GCD(BigInteger bi)
 		{
-			return Kernel.gcd (this, bi);
+			return Kernel.gcd(this, bi);
 		}
 
-		public BigInteger ModInverse (BigInteger modulus)
+		public BigInteger ModInverse(BigInteger modulus)
 		{
-			return Kernel.modInverse (this, modulus);
+			return Kernel.modInverse(this, modulus);
 		}
 
-		public BigInteger ModPow (BigInteger exp, BigInteger n)
+		public BigInteger ModPow(BigInteger exp, BigInteger n)
 		{
-			ModulusRing mr = new ModulusRing (n);
-			return mr.Pow (this, exp);
+			ModulusRing mr = new ModulusRing(n);
+			return mr.Pow(this, exp);
 		}
-		
+
 		#endregion
 
 		#region Prime Testing
 
-		public bool IsProbablePrime ()
+		public bool IsProbablePrime()
 		{
 			// can we use our small-prime table ?
-			if (this <= smallPrimes[smallPrimes.Length - 1]) {
-				for (int p = 0; p < smallPrimes.Length; p++) {
+			if (this <= smallPrimes[smallPrimes.Length - 1])
+			{
+				for (int p = 0; p < smallPrimes.Length; p++)
+				{
 					if (this == smallPrimes[p])
 						return true;
 				}
@@ -912,12 +937,13 @@ namespace Mono.Math {
 			}
 
 			// otherwise check if we can divide by one of the small primes
-			for (int p = 0; p < smallPrimes.Length; p++) {
+			for (int p = 0; p < smallPrimes.Length; p++)
+			{
 				if (this % smallPrimes[p] == 0)
 					return false;
 			}
 			// the last step is to confirm the "large" prime with the SPP or Miller-Rabin test
-			return PrimalityTests.Test (this, Prime.ConfidenceFactor.Medium);
+			return PrimalityTests.Test(this, Prime.ConfidenceFactor.Medium);
 		}
 
 		#endregion
@@ -929,36 +955,37 @@ namespace Mono.Math {
 		/// </summary>
 		/// <param name="bi">A BigInteger</param>
 		/// <returns>The smallest prime >= bi. More mathematically, if bi is prime: bi, else Prime [PrimePi [bi] + 1].</returns>
-		public static BigInteger NextHighestPrime (BigInteger bi)
+		public static BigInteger NextHighestPrime(BigInteger bi)
 		{
-			NextPrimeFinder npf = new NextPrimeFinder ();
-			return npf.GenerateNewPrime (0, bi);
+			NextPrimeFinder npf = new NextPrimeFinder();
+			return npf.GenerateNewPrime(0, bi);
 		}
 
-		public static BigInteger GeneratePseudoPrime (int bits)
+		public static BigInteger GeneratePseudoPrime(int bits)
 		{
-			SequentialSearchPrimeGeneratorBase sspg = new SequentialSearchPrimeGeneratorBase ();
-			return sspg.GenerateNewPrime (bits);
+			SequentialSearchPrimeGeneratorBase sspg = new SequentialSearchPrimeGeneratorBase();
+			return sspg.GenerateNewPrime(bits);
 		}
 
 		/// <summary>
 		/// Increments this by two
 		/// </summary>
-		public void Incr2 ()
+		public void Incr2()
 		{
 			int i = 0;
 
-			data [0] += 2;
+			data[0] += 2;
 
 			// If there was no carry, nothing to do
-			if (data [0] < 2) {
+			if (data[0] < 2)
+			{
 
 				// Account for the first carry
-				data [++i]++;
+				data[++i]++;
 
 				// Keep adding until no carry
-				while (data [i++] == 0x0)
-					data [i]++;
+				while (data[i++] == 0x0)
+					data[i]++;
 
 				// See if we increased the data length
 				if (length == (uint)i)
@@ -973,29 +1000,30 @@ namespace Mono.Math {
 #else
 		public
 #endif
-		sealed class ModulusRing {
+ sealed class ModulusRing
+		{
 
 			BigInteger mod, constant;
 
-			public ModulusRing (BigInteger modulus)
+			public ModulusRing(BigInteger modulus)
 			{
 				this.mod = modulus;
 
 				// calculate constant = b^ (2k) / m
 				uint i = mod.length << 1;
 
-				constant = new BigInteger (Sign.Positive, i + 1);
-				constant.data [i] = 0x00000001;
+				constant = new BigInteger(Sign.Positive, i + 1);
+				constant.data[i] = 0x00000001;
 
 				constant = constant / mod;
 			}
 
-			public void BarrettReduction (BigInteger x)
+			public void BarrettReduction(BigInteger x)
 			{
 				BigInteger n = mod;
 				uint k = n.length,
-					kPlusOne = k+1,
-					kMinusOne = k-1;
+					kPlusOne = k + 1,
+					kMinusOne = k - 1;
 
 				// x < mod, so nothing to do.
 				if (x.length < k) return;
@@ -1005,15 +1033,15 @@ namespace Mono.Math {
 				//
 				// Validate pointers
 				//
-				if (x.data.Length < x.length) throw new IndexOutOfRangeException ("x out of range");
+				if (x.data.Length < x.length) throw new IndexOutOfRangeException("x out of range");
 
 				// q1 = x / b^ (k-1)
 				// q2 = q1 * constant
 				// q3 = q2 / b^ (k+1), Needs to be accessed with an offset of kPlusOne
 
 				// TODO: We should the method in HAC p 604 to do this (14.45)
-				q3 = new BigInteger (Sign.Positive, x.length - kMinusOne + constant.length);
-				Kernel.Multiply (x.data, kMinusOne, x.length - kMinusOne, constant.data, 0, constant.length, q3.data, 0);
+				q3 = new BigInteger(Sign.Positive, x.length - kMinusOne + constant.length);
+				Kernel.Multiply(x.data, kMinusOne, x.length - kMinusOne, constant.data, 0, constant.length, q3.data, 0);
 
 				// r1 = x mod b^ (k+1)
 				// i.e. keep the lowest (k+1) words
@@ -1021,31 +1049,34 @@ namespace Mono.Math {
 				uint lengthToCopy = (x.length > kPlusOne) ? kPlusOne : x.length;
 
 				x.length = lengthToCopy;
-				x.Normalize ();
+				x.Normalize();
 
 				// r2 = (q3 * n) mod b^ (k+1)
 				// partial multiplication of q3 and n
 
-				BigInteger r2 = new BigInteger (Sign.Positive, kPlusOne);
-				Kernel.MultiplyMod2p32pmod (q3.data, (int)kPlusOne, (int)q3.length - (int)kPlusOne, n.data, 0, (int)n.length, r2.data, 0, (int)kPlusOne);
+				BigInteger r2 = new BigInteger(Sign.Positive, kPlusOne);
+				Kernel.MultiplyMod2p32pmod(q3.data, (int)kPlusOne, (int)q3.length - (int)kPlusOne, n.data, 0, (int)n.length, r2.data, 0, (int)kPlusOne);
 
-				r2.Normalize ();
+				r2.Normalize();
 
-				if (r2 <= x) {
-					Kernel.MinusEq (x, r2);
-				} else {
-					BigInteger val = new BigInteger (Sign.Positive, kPlusOne + 1);
-					val.data [kPlusOne] = 0x00000001;
+				if (r2 <= x)
+				{
+					Kernel.MinusEq(x, r2);
+				}
+				else
+				{
+					BigInteger val = new BigInteger(Sign.Positive, kPlusOne + 1);
+					val.data[kPlusOne] = 0x00000001;
 
-					Kernel.MinusEq (val, r2);
-					Kernel.PlusEq (x, val);
+					Kernel.MinusEq(val, r2);
+					Kernel.PlusEq(x, val);
 				}
 
 				while (x >= n)
-					Kernel.MinusEq (x, n);
+					Kernel.MinusEq(x, n);
 			}
 
-			public BigInteger Multiply (BigInteger a, BigInteger b)
+			public BigInteger Multiply(BigInteger a, BigInteger b)
 			{
 				if (a == 0 || b == 0) return 0;
 
@@ -1055,18 +1086,19 @@ namespace Mono.Math {
 				if (b > mod)
 					b %= mod;
 
-				BigInteger ret = new BigInteger (a * b);
-				BarrettReduction (ret);
+				BigInteger ret = new BigInteger(a * b);
+				BarrettReduction(ret);
 
 				return ret;
 			}
 
-			public BigInteger Difference (BigInteger a, BigInteger b)
+			public BigInteger Difference(BigInteger a, BigInteger b)
 			{
-				Sign cmp = Kernel.Compare (a, b);
+				Sign cmp = Kernel.Compare(a, b);
 				BigInteger diff;
 
-				switch (cmp) {
+				switch (cmp)
+				{
 					case Sign.Zero:
 						return 0;
 					case Sign.Positive:
@@ -1074,34 +1106,36 @@ namespace Mono.Math {
 					case Sign.Negative:
 						diff = b - a; break;
 					default:
-						throw new Exception ();
+						throw new Exception();
 				}
 
-				if (diff >= mod) {
+				if (diff >= mod)
+				{
 					if (diff.length >= mod.length << 1)
 						diff %= mod;
 					else
-						BarrettReduction (diff);
+						BarrettReduction(diff);
 				}
 				if (cmp == Sign.Negative)
 					diff = mod - diff;
 				return diff;
 			}
 #if true
-			public BigInteger Pow (BigInteger a, BigInteger k)
+			public BigInteger Pow(BigInteger a, BigInteger k)
 			{
-				BigInteger b = new BigInteger (1);
+				BigInteger b = new BigInteger(1);
 				if (k == 0)
 					return b;
 
 				BigInteger A = a;
-				if (k.TestBit (0))
+				if (k.TestBit(0))
 					b = a;
 
-				for (int i = 1; i < k.BitCount (); i++) {
-					A = Multiply (A, A);
-					if (k.TestBit (i))
-						b = Multiply (A, b);
+				for (int i = 1; i < k.BitCount(); i++)
+				{
+					A = Multiply(A, A);
+					if (k.TestBit(i))
+						b = Multiply(A, b);
 				}
 				return b;
 			}
@@ -1185,12 +1219,12 @@ namespace Mono.Math {
 			// TODO: Make tests for this, not really needed b/c prime stuff
 			// checks it, but still would be nice
 #if !INSIDE_CORLIB
-                        [CLSCompliant (false)]
-#endif 
+			[CLSCompliant(false)]
+#endif
 #if true
-			public BigInteger Pow (uint b, BigInteger exp)
+			public BigInteger Pow(uint b, BigInteger exp)
 			{
-				return Pow (new BigInteger (b), exp);
+				return Pow(new BigInteger(b), exp);
 			}
 #else
 			public BigInteger Pow (uint b, BigInteger exp)
@@ -1421,7 +1455,7 @@ namespace Mono.Math {
 				return resultNum;
 			}
 #endif
-/* known to be buggy in some cases */
+			/* known to be buggy in some cases */
 #if false
 			private unsafe BigInteger EvenModTwoPow (BigInteger exp)
 			{
@@ -1559,13 +1593,14 @@ namespace Mono.Math {
 			#endregion
 		}
 
-		internal sealed class Montgomery {
+		internal sealed class Montgomery
+		{
 
-			private Montgomery () 
+			private Montgomery()
 			{
 			}
 
-			public static uint Inverse (uint n)
+			public static uint Inverse(uint n)
 			{
 				uint y = n, z;
 
@@ -1575,23 +1610,25 @@ namespace Mono.Math {
 				return (uint)-y;
 			}
 
-			public static BigInteger ToMont (BigInteger n, BigInteger m)
+			public static BigInteger ToMont(BigInteger n, BigInteger m)
 			{
-				n.Normalize (); m.Normalize ();
+				n.Normalize(); m.Normalize();
 
 				n <<= (int)m.length * 32;
 				n %= m;
 				return n;
 			}
 
-			public static unsafe BigInteger Reduce (BigInteger n, BigInteger m, uint mPrime)
+			public static unsafe BigInteger Reduce(BigInteger n, BigInteger m, uint mPrime)
 			{
 				BigInteger A = n;
-				fixed (uint* a = A.data, mm = m.data) {
-					for (uint i = 0; i < m.length; i++) {
+				fixed (uint* a = A.data, mm = m.data)
+				{
+					for (uint i = 0; i < m.length; i++)
+					{
 						// The mod here is taken care of by the CPU,
 						// since the multiply will overflow.
-						uint u_i = a [0] * mPrime /* % 2^32 */;
+						uint u_i = a[0] * mPrime /* % 2^32 */;
 
 						//
 						// A += u_i * m;
@@ -1608,7 +1645,8 @@ namespace Mono.Math {
 						uint j = 1;
 
 						// Multiply and add
-						for (; j < m.length; j++) {
+						for (; j < m.length; j++)
+						{
 							c += (ulong)u_i * (ulong)*(mP++) + *(aSP++);
 							*(aDP++) = (uint)c;
 							c >>= 32;
@@ -1616,24 +1654,26 @@ namespace Mono.Math {
 
 						// Account for carry
 						// TODO: use a better loop here, we dont need the ulong stuff
-						for (; j < A.length; j++) {
+						for (; j < A.length; j++)
+						{
 							c += *(aSP++);
 							*(aDP++) = (uint)c;
 							c >>= 32;
-							if (c == 0) {j++; break;}
+							if (c == 0) { j++; break; }
 						}
 						// Copy the rest
-						for (; j < A.length; j++) {
+						for (; j < A.length; j++)
+						{
 							*(aDP++) = *(aSP++);
 						}
 
 						*(aDP++) = (uint)c;
 					}
 
-					while (A.length > 1 && a [A.length-1] == 0) A.length--;
+					while (A.length > 1 && a[A.length - 1] == 0) A.length--;
 
 				}
-				if (A >= m) Kernel.MinusEq (A, m);
+				if (A >= m) Kernel.MinusEq(A, m);
 
 				return A;
 			}
@@ -1648,7 +1688,8 @@ namespace Mono.Math {
 		/// <summary>
 		/// Low level functions for the BigInteger
 		/// </summary>
-		private sealed class Kernel {
+		private sealed class Kernel
+		{
 
 			#region Addition/Subtraction
 
@@ -1658,77 +1699,86 @@ namespace Mono.Math {
 			/// <param name="bi1">A BigInteger</param>
 			/// <param name="bi2">A BigInteger</param>
 			/// <returns>bi1 + bi2</returns>
-			public static BigInteger AddSameSign (BigInteger bi1, BigInteger bi2)
+			public static BigInteger AddSameSign(BigInteger bi1, BigInteger bi2)
 			{
-				uint [] x, y;
+				uint[] x, y;
 				uint yMax, xMax, i = 0;
 
 				// x should be bigger
-				if (bi1.length < bi2.length) {
+				if (bi1.length < bi2.length)
+				{
 					x = bi2.data;
 					xMax = bi2.length;
 					y = bi1.data;
 					yMax = bi1.length;
-				} else {
+				}
+				else
+				{
 					x = bi1.data;
 					xMax = bi1.length;
 					y = bi2.data;
 					yMax = bi2.length;
 				}
-				
-				BigInteger result = new BigInteger (Sign.Positive, xMax + 1);
 
-				uint [] r = result.data;
+				BigInteger result = new BigInteger(Sign.Positive, xMax + 1);
+
+				uint[] r = result.data;
 
 				ulong sum = 0;
 
 				// Add common parts of both numbers
-				do {
-					sum = ((ulong)x [i]) + ((ulong)y [i]) + sum;
-					r [i] = (uint)sum;
+				do
+				{
+					sum = ((ulong)x[i]) + ((ulong)y[i]) + sum;
+					r[i] = (uint)sum;
 					sum >>= 32;
 				} while (++i < yMax);
 
 				// Copy remainder of longer number while carry propagation is required
 				bool carry = (sum != 0);
 
-				if (carry) {
+				if (carry)
+				{
 
-					if (i < xMax) {
+					if (i < xMax)
+					{
 						do
-							carry = ((r [i] = x [i] + 1) == 0);
+							carry = ((r[i] = x[i] + 1) == 0);
 						while (++i < xMax && carry);
 					}
 
-					if (carry) {
-						r [i] = 1;
+					if (carry)
+					{
+						r[i] = 1;
 						result.length = ++i;
 						return result;
 					}
 				}
 
 				// Copy the rest
-				if (i < xMax) {
+				if (i < xMax)
+				{
 					do
-						r [i] = x [i];
+						r[i] = x[i];
 					while (++i < xMax);
 				}
 
-				result.Normalize ();
+				result.Normalize();
 				return result;
 			}
 
-			public static BigInteger Subtract (BigInteger big, BigInteger small)
+			public static BigInteger Subtract(BigInteger big, BigInteger small)
 			{
-				BigInteger result = new BigInteger (Sign.Positive, big.length);
+				BigInteger result = new BigInteger(Sign.Positive, big.length);
 
-				uint [] r = result.data, b = big.data, s = small.data;
+				uint[] r = result.data, b = big.data, s = small.data;
 				uint i = 0, c = 0;
 
-				do {
+				do
+				{
 
-					uint x = s [i];
-					if (((x += c) < c) | ((r [i] = b [i] - x) > ~x))
+					uint x = s[i];
+					if (((x += c) < c) | ((r[i] = b[i] - x) > ~x))
 						c = 1;
 					else
 						c = 0;
@@ -1737,32 +1787,34 @@ namespace Mono.Math {
 
 				if (i == big.length) goto fixup;
 
-				if (c == 1) {
+				if (c == 1)
+				{
 					do
-						r [i] = b [i] - 1;
-					while (b [i++] == 0 && i < big.length);
+						r[i] = b[i] - 1;
+					while (b[i++] == 0 && i < big.length);
 
 					if (i == big.length) goto fixup;
 				}
 
 				do
-					r [i] = b [i];
+					r[i] = b[i];
 				while (++i < big.length);
 
-				fixup:
+			fixup:
 
-					result.Normalize ();
+				result.Normalize();
 				return result;
 			}
 
-			public static void MinusEq (BigInteger big, BigInteger small)
+			public static void MinusEq(BigInteger big, BigInteger small)
 			{
-				uint [] b = big.data, s = small.data;
+				uint[] b = big.data, s = small.data;
 				uint i = 0, c = 0;
 
-				do {
-					uint x = s [i];
-					if (((x += c) < c) | ((b [i] -= x) > ~x))
+				do
+				{
+					uint x = s[i];
+					if (((x += c) < c) | ((b[i] -= x) > ~x))
 						c = 1;
 					else
 						c = 0;
@@ -1770,16 +1822,17 @@ namespace Mono.Math {
 
 				if (i == big.length) goto fixup;
 
-				if (c == 1) {
+				if (c == 1)
+				{
 					do
-						b [i]--;
-					while (b [i++] == 0 && i < big.length);
+						b[i]--;
+					while (b[i++] == 0 && i < big.length);
 				}
 
-				fixup:
+			fixup:
 
-					// Normalize length
-					while (big.length > 0 && big.data [big.length-1] == 0) big.length--;
+				// Normalize length
+				while (big.length > 0 && big.data[big.length - 1] == 0) big.length--;
 
 				// Check for zero
 				if (big.length == 0)
@@ -1787,64 +1840,72 @@ namespace Mono.Math {
 
 			}
 
-			public static void PlusEq (BigInteger bi1, BigInteger bi2)
+			public static void PlusEq(BigInteger bi1, BigInteger bi2)
 			{
-				uint [] x, y;
+				uint[] x, y;
 				uint yMax, xMax, i = 0;
 				bool flag = false;
 
 				// x should be bigger
-				if (bi1.length < bi2.length){
+				if (bi1.length < bi2.length)
+				{
 					flag = true;
 					x = bi2.data;
 					xMax = bi2.length;
 					y = bi1.data;
 					yMax = bi1.length;
-				} else {
+				}
+				else
+				{
 					x = bi1.data;
 					xMax = bi1.length;
 					y = bi2.data;
 					yMax = bi2.length;
 				}
 
-				uint [] r = bi1.data;
+				uint[] r = bi1.data;
 
 				ulong sum = 0;
 
 				// Add common parts of both numbers
-				do {
-					sum += ((ulong)x [i]) + ((ulong)y [i]);
-					r [i] = (uint)sum;
+				do
+				{
+					sum += ((ulong)x[i]) + ((ulong)y[i]);
+					r[i] = (uint)sum;
 					sum >>= 32;
 				} while (++i < yMax);
 
 				// Copy remainder of longer number while carry propagation is required
 				bool carry = (sum != 0);
 
-				if (carry){
+				if (carry)
+				{
 
-					if (i < xMax) {
+					if (i < xMax)
+					{
 						do
-							carry = ((r [i] = x [i] + 1) == 0);
+							carry = ((r[i] = x[i] + 1) == 0);
 						while (++i < xMax && carry);
 					}
 
-					if (carry) {
-						r [i] = 1;
+					if (carry)
+					{
+						r[i] = 1;
 						bi1.length = ++i;
 						return;
 					}
 				}
 
 				// Copy the rest
-				if (flag && i < xMax - 1) {
+				if (flag && i < xMax - 1)
+				{
 					do
-						r [i] = x [i];
+						r[i] = x[i];
 					while (++i < xMax);
 				}
 
 				bi1.length = xMax + 1;
-				bi1.Normalize ();
+				bi1.Normalize();
 			}
 
 			#endregion
@@ -1857,15 +1918,15 @@ namespace Mono.Math {
 			/// <param name="bi1">A BigInteger</param>
 			/// <param name="bi2">A BigInteger</param>
 			/// <returns>The sign of bi1 - bi2</returns>
-			public static Sign Compare (BigInteger bi1, BigInteger bi2)
+			public static Sign Compare(BigInteger bi1, BigInteger bi2)
 			{
 				//
 				// Step 1. Compare the lengths
 				//
 				uint l1 = bi1.length, l2 = bi2.length;
 
-				while (l1 > 0 && bi1.data [l1-1] == 0) l1--;
-				while (l2 > 0 && bi2.data [l2-1] == 0) l2--;
+				while (l1 > 0 && bi1.data[l1 - 1] == 0) l1--;
+				while (l2 > 0 && bi2.data[l2 - 1] == 0) l2--;
 
 				if (l1 == 0 && l2 == 0) return Sign.Zero;
 
@@ -1880,11 +1941,11 @@ namespace Mono.Math {
 
 				uint pos = l1 - 1;
 
-				while (pos != 0 && bi1.data [pos] == bi2.data [pos]) pos--;
-				
-				if (bi1.data [pos] < bi2.data [pos])
+				while (pos != 0 && bi1.data[pos] == bi2.data[pos]) pos--;
+
+				if (bi1.data[pos] < bi2.data[pos])
 					return Sign.Negative;
-				else if (bi1.data [pos] > bi2.data [pos])
+				else if (bi1.data[pos] > bi2.data[pos])
 					return Sign.Positive;
 				else
 					return Sign.Zero;
@@ -1902,123 +1963,131 @@ namespace Mono.Math {
 			/// <param name="n">A BigInteger, upon exit this will hold n / d</param>
 			/// <param name="d">The divisor</param>
 			/// <returns>n % d</returns>
-			public static uint SingleByteDivideInPlace (BigInteger n, uint d)
+			public static uint SingleByteDivideInPlace(BigInteger n, uint d)
 			{
 				ulong r = 0;
 				uint i = n.length;
 
-				while (i-- > 0) {
+				while (i-- > 0)
+				{
 					r <<= 32;
-					r |= n.data [i];
-					n.data [i] = (uint)(r / d);
+					r |= n.data[i];
+					n.data[i] = (uint)(r / d);
 					r %= d;
 				}
-				n.Normalize ();
+				n.Normalize();
 
 				return (uint)r;
 			}
 
-			public static uint DwordMod (BigInteger n, uint d)
+			public static uint DwordMod(BigInteger n, uint d)
 			{
 				ulong r = 0;
 				uint i = n.length;
 
-				while (i-- > 0) {
+				while (i-- > 0)
+				{
 					r <<= 32;
-					r |= n.data [i];
+					r |= n.data[i];
 					r %= d;
 				}
 
 				return (uint)r;
 			}
 
-			public static BigInteger DwordDiv (BigInteger n, uint d)
+			public static BigInteger DwordDiv(BigInteger n, uint d)
 			{
-				BigInteger ret = new BigInteger (Sign.Positive, n.length);
+				BigInteger ret = new BigInteger(Sign.Positive, n.length);
 
 				ulong r = 0;
 				uint i = n.length;
 
-				while (i-- > 0) {
+				while (i-- > 0)
+				{
 					r <<= 32;
-					r |= n.data [i];
-					ret.data [i] = (uint)(r / d);
+					r |= n.data[i];
+					ret.data[i] = (uint)(r / d);
 					r %= d;
 				}
-				ret.Normalize ();
+				ret.Normalize();
 
 				return ret;
 			}
 
-			public static BigInteger [] DwordDivMod (BigInteger n, uint d)
+			public static BigInteger[] DwordDivMod(BigInteger n, uint d)
 			{
-				BigInteger ret = new BigInteger (Sign.Positive , n.length);
+				BigInteger ret = new BigInteger(Sign.Positive, n.length);
 
 				ulong r = 0;
 				uint i = n.length;
 
-				while (i-- > 0) {
+				while (i-- > 0)
+				{
 					r <<= 32;
-					r |= n.data [i];
-					ret.data [i] = (uint)(r / d);
+					r |= n.data[i];
+					ret.data[i] = (uint)(r / d);
 					r %= d;
 				}
-				ret.Normalize ();
+				ret.Normalize();
 
 				BigInteger rem = (uint)r;
 
-				return new BigInteger [] {ret, rem};
+				return new BigInteger[] { ret, rem };
 			}
 
-				#endregion
+			#endregion
 
 			#region BigNum
 
-			public static BigInteger [] multiByteDivide (BigInteger bi1, BigInteger bi2)
+			public static BigInteger[] multiByteDivide(BigInteger bi1, BigInteger bi2)
 			{
-				if (Kernel.Compare (bi1, bi2) == Sign.Negative)
-					return new BigInteger [2] { 0, new BigInteger (bi1) };
+				if (Kernel.Compare(bi1, bi2) == Sign.Negative)
+					return new BigInteger[2] { 0, new BigInteger(bi1) };
 
-				bi1.Normalize (); bi2.Normalize ();
+				bi1.Normalize(); bi2.Normalize();
 
 				if (bi2.length == 1)
-					return DwordDivMod (bi1, bi2.data [0]);
+					return DwordDivMod(bi1, bi2.data[0]);
 
 				uint remainderLen = bi1.length + 1;
 				int divisorLen = (int)bi2.length + 1;
 
 				uint mask = 0x80000000;
-				uint val = bi2.data [bi2.length - 1];
+				uint val = bi2.data[bi2.length - 1];
 				int shift = 0;
 				int resultPos = (int)bi1.length - (int)bi2.length;
 
-				while (mask != 0 && (val & mask) == 0) {
+				while (mask != 0 && (val & mask) == 0)
+				{
 					shift++; mask >>= 1;
 				}
 
-				BigInteger quot = new BigInteger (Sign.Positive, bi1.length - bi2.length + 1);
+				BigInteger quot = new BigInteger(Sign.Positive, bi1.length - bi2.length + 1);
 				BigInteger rem = (bi1 << shift);
 
-				uint [] remainder = rem.data;
+				uint[] remainder = rem.data;
 
 				bi2 = bi2 << shift;
 
 				int j = (int)(remainderLen - bi2.length);
 				int pos = (int)remainderLen - 1;
 
-				uint firstDivisorByte = bi2.data [bi2.length-1];
-				ulong secondDivisorByte = bi2.data [bi2.length-2];
+				uint firstDivisorByte = bi2.data[bi2.length - 1];
+				ulong secondDivisorByte = bi2.data[bi2.length - 2];
 
-				while (j > 0) {
-					ulong dividend = ((ulong)remainder [pos] << 32) + (ulong)remainder [pos-1];
+				while (j > 0)
+				{
+					ulong dividend = ((ulong)remainder[pos] << 32) + (ulong)remainder[pos - 1];
 
 					ulong q_hat = dividend / (ulong)firstDivisorByte;
 					ulong r_hat = dividend % (ulong)firstDivisorByte;
 
-					do {
+					do
+					{
 
 						if (q_hat == 0x100000000 ||
-							(q_hat * secondDivisorByte) > ((r_hat << 32) + remainder [pos-2])) {
+							(q_hat * secondDivisorByte) > ((r_hat << 32) + remainder[pos - 2]))
+						{
 							q_hat--;
 							r_hat += (ulong)firstDivisorByte;
 
@@ -2040,12 +2109,13 @@ namespace Mono.Math {
 					int nPos = pos - divisorLen + 1;
 					ulong mc = 0;
 					uint uint_q_hat = (uint)q_hat;
-					do {
-						mc += (ulong)bi2.data [dPos] * (ulong)uint_q_hat;
-						t = remainder [nPos];
-						remainder [nPos] -= (uint)mc;
+					do
+					{
+						mc += (ulong)bi2.data[dPos] * (ulong)uint_q_hat;
+						t = remainder[nPos];
+						remainder[nPos] -= (uint)mc;
 						mc >>= 32;
-						if (remainder [nPos] > t) mc++;
+						if (remainder[nPos] > t) mc++;
 						dPos++; nPos++;
 					} while (dPos < divisorLen);
 
@@ -2053,31 +2123,33 @@ namespace Mono.Math {
 					dPos = 0;
 
 					// Overestimate
-					if (mc != 0) {
+					if (mc != 0)
+					{
 						uint_q_hat--;
 						ulong sum = 0;
 
-						do {
-							sum = ((ulong)remainder [nPos]) + ((ulong)bi2.data [dPos]) + sum;
-							remainder [nPos] = (uint)sum;
+						do
+						{
+							sum = ((ulong)remainder[nPos]) + ((ulong)bi2.data[dPos]) + sum;
+							remainder[nPos] = (uint)sum;
 							sum >>= 32;
 							dPos++; nPos++;
 						} while (dPos < divisorLen);
 
 					}
 
-					quot.data [resultPos--] = (uint)uint_q_hat;
+					quot.data[resultPos--] = (uint)uint_q_hat;
 
 					pos--;
 					j--;
 				}
 
-				quot.Normalize ();
-				rem.Normalize ();
-				BigInteger [] ret = new BigInteger [2] { quot, rem };
+				quot.Normalize();
+				rem.Normalize();
+				BigInteger[] ret = new BigInteger[2] { quot, rem };
 
 				if (shift != 0)
-					ret [1] >>= shift;
+					ret[1] >>= shift;
 
 				return ret;
 			}
@@ -2087,61 +2159,70 @@ namespace Mono.Math {
 			#endregion
 
 			#region Shift
-			public static BigInteger LeftShift (BigInteger bi, int n)
+			public static BigInteger LeftShift(BigInteger bi, int n)
 			{
-				if (n == 0) return new BigInteger (bi, bi.length + 1);
+				if (n == 0) return new BigInteger(bi, bi.length + 1);
 
 				int w = n >> 5;
 				n &= ((1 << 5) - 1);
 
-				BigInteger ret = new BigInteger (Sign.Positive, bi.length + 1 + (uint)w);
+				BigInteger ret = new BigInteger(Sign.Positive, bi.length + 1 + (uint)w);
 
 				uint i = 0, l = bi.length;
-				if (n != 0) {
+				if (n != 0)
+				{
 					uint x, carry = 0;
-					while (i < l) {
-						x = bi.data [i];
-						ret.data [i + w] = (x << n) | carry;
+					while (i < l)
+					{
+						x = bi.data[i];
+						ret.data[i + w] = (x << n) | carry;
 						carry = x >> (32 - n);
 						i++;
 					}
-					ret.data [i + w] = carry;
-				} else {
-					while (i < l) {
-						ret.data [i + w] = bi.data [i];
+					ret.data[i + w] = carry;
+				}
+				else
+				{
+					while (i < l)
+					{
+						ret.data[i + w] = bi.data[i];
 						i++;
 					}
 				}
 
-				ret.Normalize ();
+				ret.Normalize();
 				return ret;
 			}
 
-			public static BigInteger RightShift (BigInteger bi, int n)
+			public static BigInteger RightShift(BigInteger bi, int n)
 			{
-				if (n == 0) return new BigInteger (bi);
+				if (n == 0) return new BigInteger(bi);
 
 				int w = n >> 5;
 				int s = n & ((1 << 5) - 1);
 
-				BigInteger ret = new BigInteger (Sign.Positive, bi.length - (uint)w + 1);
+				BigInteger ret = new BigInteger(Sign.Positive, bi.length - (uint)w + 1);
 				uint l = (uint)ret.data.Length - 1;
 
-				if (s != 0) {
+				if (s != 0)
+				{
 
 					uint x, carry = 0;
 
-					while (l-- > 0) {
-						x = bi.data [l + w];
-						ret.data [l] = (x >> n) | carry;
+					while (l-- > 0)
+					{
+						x = bi.data[l + w];
+						ret.data[l] = (x >> n) | carry;
 						carry = x << (32 - n);
 					}
-				} else {
+				}
+				else
+				{
 					while (l-- > 0)
-						ret.data [l] = bi.data [l + w];
+						ret.data[l] = bi.data[l + w];
 
 				}
-				ret.Normalize ();
+				ret.Normalize();
 				return ret;
 			}
 
@@ -2149,20 +2230,21 @@ namespace Mono.Math {
 
 			#region Multiply
 
-			public static BigInteger MultiplyByDword (BigInteger n, uint f)
+			public static BigInteger MultiplyByDword(BigInteger n, uint f)
 			{
-				BigInteger ret = new BigInteger (Sign.Positive, n.length + 1);
+				BigInteger ret = new BigInteger(Sign.Positive, n.length + 1);
 
 				uint i = 0;
 				ulong c = 0;
 
-				do {
-					c += (ulong)n.data [i] * (ulong)f;
-					ret.data [i] = (uint)c;
+				do
+				{
+					c += (ulong)n.data[i] * (ulong)f;
+					ret.data[i] = (uint)c;
 					c >>= 32;
 				} while (++i < n.length);
-				ret.data [i] = (uint)c;
-				ret.Normalize ();
+				ret.data[i] = (uint)c;
+				ret.Normalize();
 				return ret;
 
 			}
@@ -2177,23 +2259,26 @@ namespace Mono.Math {
 			/// sure that it is safe to access x [xOffset:xOffset+xLen],
 			/// y [yOffset:yOffset+yLen], and d [dOffset:dOffset+xLen+yLen].
 			/// </remarks>
-			public static unsafe void Multiply (uint [] x, uint xOffset, uint xLen, uint [] y, uint yOffset, uint yLen, uint [] d, uint dOffset)
+			public static unsafe void Multiply(uint[] x, uint xOffset, uint xLen, uint[] y, uint yOffset, uint yLen, uint[] d, uint dOffset)
 			{
-				fixed (uint* xx = x, yy = y, dd = d) {
+				fixed (uint* xx = x, yy = y, dd = d)
+				{
 					uint* xP = xx + xOffset,
 						xE = xP + xLen,
 						yB = yy + yOffset,
 						yE = yB + yLen,
 						dB = dd + dOffset;
 
-					for (; xP < xE; xP++, dB++) {
+					for (; xP < xE; xP++, dB++)
+					{
 
 						if (*xP == 0) continue;
 
 						ulong mcarry = 0;
 
 						uint* dP = dB;
-						for (uint* yP = yB; yP < yE; yP++, dP++) {
+						for (uint* yP = yB; yP < yE; yP++, dP++)
+						{
 							mcarry += ((ulong)*xP * (ulong)*yP) + (ulong)*dP;
 
 							*dP = (uint)mcarry;
@@ -2216,9 +2301,10 @@ namespace Mono.Math {
 			/// sure that it is safe to access x [xOffset:xOffset+xLen],
 			/// y [yOffset:yOffset+yLen], and d [dOffset:dOffset+mod].
 			/// </remarks>
-			public static unsafe void MultiplyMod2p32pmod (uint [] x, int xOffset, int xLen, uint [] y, int yOffest, int yLen, uint [] d, int dOffset, int mod)
+			public static unsafe void MultiplyMod2p32pmod(uint[] x, int xOffset, int xLen, uint[] y, int yOffest, int yLen, uint[] d, int dOffset, int mod)
 			{
-				fixed (uint* xx = x, yy = y, dd = d) {
+				fixed (uint* xx = x, yy = y, dd = d)
+				{
 					uint* xP = xx + xOffset,
 						xE = xP + xLen,
 						yB = yy + yOffest,
@@ -2226,13 +2312,15 @@ namespace Mono.Math {
 						dB = dd + dOffset,
 						dE = dB + mod;
 
-					for (; xP < xE; xP++, dB++) {
+					for (; xP < xE; xP++, dB++)
+					{
 
 						if (*xP == 0) continue;
 
 						ulong mcarry = 0;
 						uint* dP = dB;
-						for (uint* yP = yB; yP < yE && dP < dE; yP++, dP++) {
+						for (uint* yP = yB; yP < yE && dP < dE; yP++, dP++)
+						{
 							mcarry += ((ulong)*xP * (ulong)*yP) + (ulong)*dP;
 
 							*dP = (uint)mcarry;
@@ -2245,15 +2333,16 @@ namespace Mono.Math {
 				}
 			}
 
-			public static unsafe void SquarePositive (BigInteger bi, ref uint [] wkSpace)
+			public static unsafe void SquarePositive(BigInteger bi, ref uint[] wkSpace)
 			{
-				uint [] t = wkSpace;
+				uint[] t = wkSpace;
 				wkSpace = bi.data;
-				uint [] d = bi.data;
+				uint[] d = bi.data;
 				uint dl = bi.length;
 				bi.data = t;
 
-				fixed (uint* dd = d, tt = t) {
+				fixed (uint* dd = d, tt = t)
+				{
 
 					uint* ttE = tt + t.Length;
 					// Clear the dest
@@ -2262,16 +2351,18 @@ namespace Mono.Math {
 
 					uint* dP = dd, tP = tt;
 
-					for (uint i = 0; i < dl; i++, dP++) {
+					for (uint i = 0; i < dl; i++, dP++)
+					{
 						if (*dP == 0)
 							continue;
 
 						ulong mcarry = 0;
 						uint bi1val = *dP;
 
-						uint* dP2 = dP + 1, tP2 = tP + 2*i + 1;
+						uint* dP2 = dP + 1, tP2 = tP + 2 * i + 1;
 
-						for (uint j = i + 1; j < dl; j++, tP2++, dP2++) {
+						for (uint j = i + 1; j < dl; j++, tP2++, dP2++)
+						{
 							// k = i + j
 							mcarry += ((ulong)bi1val * (ulong)*dP2) + *tP2;
 
@@ -2288,7 +2379,8 @@ namespace Mono.Math {
 					tP = tt;
 
 					uint x, carry = 0;
-					while (tP < ttE) {
+					while (tP < ttE)
+					{
 						x = *tP;
 						*tP = (x << 1) | carry;
 						carry = x >> (32 - 1);
@@ -2300,12 +2392,14 @@ namespace Mono.Math {
 
 					dP = dd;
 					tP = tt;
-					for (uint* dE = dP + dl; (dP < dE); dP++, tP++) {
+					for (uint* dE = dP + dl; (dP < dE); dP++, tP++)
+					{
 						ulong val = (ulong)*dP * (ulong)*dP + *tP;
 						*tP = (uint)val;
 						val >>= 32;
 						*(++tP) += (uint)val;
-						if (*tP < (uint)val) {
+						if (*tP < (uint)val)
+						{
 							uint* tP3 = tP;
 							// Account for the first carry
 							(*++tP3)++;
@@ -2320,39 +2414,40 @@ namespace Mono.Math {
 					bi.length <<= 1;
 
 					// Normalize length
-					while (tt [bi.length-1] == 0 && bi.length > 1) bi.length--;
+					while (tt[bi.length - 1] == 0 && bi.length > 1) bi.length--;
 
 				}
 			}
 
-/* 
- * Never called in BigInteger (and part of a private class)
- * 			public static bool Double (uint [] u, int l)
-			{
-				uint x, carry = 0;
-				uint i = 0;
-				while (i < l) {
-					x = u [i];
-					u [i] = (x << 1) | carry;
-					carry = x >> (32 - 1);
-					i++;
-				}
-				if (carry != 0) u [l] = carry;
-				return carry != 0;
-			}*/
+			/* 
+			 * Never called in BigInteger (and part of a private class)
+			 * 			public static bool Double (uint [] u, int l)
+						{
+							uint x, carry = 0;
+							uint i = 0;
+							while (i < l) {
+								x = u [i];
+								u [i] = (x << 1) | carry;
+								carry = x >> (32 - 1);
+								i++;
+							}
+							if (carry != 0) u [l] = carry;
+							return carry != 0;
+						}*/
 
 			#endregion
 
 			#region Number Theory
 
-			public static BigInteger gcd (BigInteger a, BigInteger b)
+			public static BigInteger gcd(BigInteger a, BigInteger b)
 			{
 				BigInteger x = a;
 				BigInteger y = b;
 
 				BigInteger g = y;
 
-				while (x.length > 1) {
+				while (x.length > 1)
+				{
 					g = x;
 					x = y % x;
 					y = g;
@@ -2367,15 +2462,17 @@ namespace Mono.Math {
 				// as it should be faster.
 				//
 
-				uint yy = x.data [0];
+				uint yy = x.data[0];
 				uint xx = y % yy;
 
 				int t = 0;
 
-				while (((xx | yy) & 1) == 0) {
+				while (((xx | yy) & 1) == 0)
+				{
 					xx >>= 1; yy >>= 1; t++;
 				}
-				while (xx != 0) {
+				while (xx != 0)
+				{
 					while ((xx & 1) == 0) xx >>= 1;
 					while ((yy & 1) == 0) yy >>= 1;
 					if (xx >= yy)
@@ -2387,12 +2484,13 @@ namespace Mono.Math {
 				return yy << t;
 			}
 
-			public static uint modInverse (BigInteger bi, uint modulus)
+			public static uint modInverse(BigInteger bi, uint modulus)
 			{
 				uint a = modulus, b = bi % modulus;
 				uint p0 = 0, p1 = 1;
 
-				while (b != 0) {
+				while (b != 0)
+				{
 					if (b == 1)
 						return p1;
 					p0 += (a / b) * p1;
@@ -2401,7 +2499,7 @@ namespace Mono.Math {
 					if (a == 0)
 						break;
 					if (a == 1)
-						return modulus-p0;
+						return modulus - p0;
 
 					p1 += (b / a) * p0;
 					b %= a;
@@ -2409,48 +2507,59 @@ namespace Mono.Math {
 				}
 				return 0;
 			}
-			
-			public static BigInteger modInverse (BigInteger bi, BigInteger modulus)
-			{
-				if (modulus.length == 1) return modInverse (bi, modulus.data [0]);
 
-				BigInteger [] p = { 0, 1 };
-				BigInteger [] q = new BigInteger [2];    // quotients
-				BigInteger [] r = { 0, 0 };             // remainders
+			public static BigInteger modInverse(BigInteger bi, BigInteger modulus)
+			{
+				if (modulus.length == 1) return modInverse(bi, modulus.data[0]);
+
+				BigInteger[] p = { 0, 1 };
+				BigInteger[] q = new BigInteger[2];    // quotients
+				BigInteger[] r = { 0, 0 };             // remainders
 
 				int step = 0;
 
 				BigInteger a = modulus;
 				BigInteger b = bi;
 
-				ModulusRing mr = new ModulusRing (modulus);
+				ModulusRing mr = new ModulusRing(modulus);
 
-				while (b != 0) {
+				while (b != 0)
+				{
 
-					if (step > 1) {
+					if (step > 1)
+					{
 
-						BigInteger pval = mr.Difference (p [0], p [1] * q [0]);
-						p [0] = p [1]; p [1] = pval;
+						BigInteger pval = mr.Difference(p[0], p[1] * q[0]);
+						p[0] = p[1]; p[1] = pval;
 					}
 
-					BigInteger [] divret = multiByteDivide (a, b);
+					BigInteger[] divret = multiByteDivide(a, b);
 
-					q [0] = q [1]; q [1] = divret [0];
-					r [0] = r [1]; r [1] = divret [1];
+					q[0] = q[1]; q[1] = divret[0];
+					r[0] = r[1]; r[1] = divret[1];
 					a = b;
-					b = divret [1];
+					b = divret[1];
 
 					step++;
 				}
 
-				if (r [0] != 1)
-					throw (new ArithmeticException ("No inverse!"));
+				if (r[0] != 1)
+					throw (new ArithmeticException("No inverse!"));
 
-				return mr.Difference (p [0], p [1] * q [0]);
+				return mr.Difference(p[0], p[1] * q[0]);
 
 			}
 			#endregion
 		}
+
+		#region *** PPPNET VALUE ADDS
+		public int ModDivInPlace(int mod)
+		{
+			int rem = (int)Kernel.SingleByteDivideInPlace(this, (uint)mod);
+			return rem;
+		}
+		#endregion //*** PPPNET VALUE ADDS
+		
 	}
 }
 #endif

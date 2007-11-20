@@ -28,15 +28,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CSharpOptParse, Version=1.0.1.0, Culture=neutral, PublicKeyToken=fc987de5fe9f6e83, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\vendor\CsharpOptParse\bin\Debug\CSharpOptParse.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\CmdLineOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="tests\TestFailedException.cs" />
-    <Compile Include="tests\IntegrityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PerfectPaperPasswords\PerfectPaperPasswords.csproj">
