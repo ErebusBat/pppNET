@@ -18,7 +18,7 @@ namespace PerfectPaperPasswords.Core
 			_alphabet = new PppAlphabet(alphabet);
 		}
 		#endregion //*** ctors
-		
+
 		#region *** Properties
 		private string _sequenceKeyHex;
 		public string SequenceKeyHex
@@ -88,6 +88,26 @@ namespace PerfectPaperPasswords.Core
 			}
 			return bytes.ToArray();
 		}
+
+		/// <summary>
+		/// Because the PPPv3 spec says that individual passcodes can not
+		/// cross crypto/counter boundaries we must calculate how many
+		/// passcodes we can generate out of a given block of 128 bits
+		/// </summary>
+		/// <returns></returns>
+		public int CalculatePasscodesPerBlock(int passcodeLength, int alphabetLength)
+		{
+			byte[] bits128 = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+			BigInteger allBits = new BigInteger(bits128);
+			int charactersPerBlock = 0;
+			while (allBits > alphabetLength)
+			{
+				allBits.ModDivInPlace(alphabetLength);
+				charactersPerBlock++;
+			}
+			int codesPerBlock = charactersPerBlock / passcodeLength;
+			return codesPerBlock;
+		}
 		#endregion //*** Methods
 
 		#region *** Internal Methods
@@ -115,6 +135,6 @@ namespace PerfectPaperPasswords.Core
 			return PppConvert.SwapBits(cryptoBlock);
 		}
 		#endregion //*** Internal Methods
-      
+
 	}
 }

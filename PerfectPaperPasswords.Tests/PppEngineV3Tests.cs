@@ -13,7 +13,6 @@ namespace PerfectPaperPasswords.Tests
 	public class PppEngineV3Tests
 	{
 		PppV3Engine ppp;
-		BigInteger counter;
 		byte[] sequenceKey = pppHelper.GetSequenceKeyFromPassword("zombie");
 		string alphabet = "23456789!@#%+=:?abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPRSTUVWXYZ";
 
@@ -39,19 +38,46 @@ namespace PerfectPaperPasswords.Tests
 		public void Setup()
 		{
 			ppp = new PppV3Engine(sequenceKey, alphabet);
-			counter = BigInteger.Parse("0");
 		}
 
 		[Test]
-		public void Dump()
+		public void CalculatePasscodesPerBlock_V2Params()
 		{
-			char[] bytes = ppp.GetCounterCodeBytes(counter);
+			//Tests based on the PPPv2 parameters of 4 and 64
+			int actual = ppp.CalculatePasscodesPerBlock(4, 64);
+			Assert.AreEqual(5, actual);
+		}
+
+		[Test]
+		public void CalculatePasscodesPerBlock_OtherParams()
+		{
+			int actual = ppp.CalculatePasscodesPerBlock(3, 64);
+			Assert.AreEqual(7, actual);
 		}
 
 		[Test]
 		public void Newgroup5518_First5Test()
 		{
+			BigInteger counter = BigInteger.Parse("0");
 			string[] knownGood = { "4p=#", "3WCg", "AcG#", "bvX8", "a!hM" };
+			char[] rawCodeData = ppp.GetCounterCodeBytes(counter);
+			testCodeBlock(rawCodeData, knownGood);
+		}
+
+		[Test]
+		public void Newsgroup5518_Second5Test()
+		{
+			BigInteger counter = BigInteger.Parse("1");
+			string[] knownGood = { "eXk?", "oEWm", "yTaz", "%cFN", "vNYL" };
+			char[] rawCodeData = ppp.GetCounterCodeBytes(counter);
+			testCodeBlock(rawCodeData, knownGood);
+		}
+
+		[Test]
+		public void Newsgroup5518_BlockSpanningFirst10()
+		{
+			BigInteger counter = BigInteger.Parse("0");
+			string[] knownGood = { "4p=#", "3WCg", "AcG#", "bvX8", "a!hM", "eXk?", "oEWm", "yTaz", "%cFN", "vNYL" };
 			char[] rawCodeData = ppp.GetCounterCodeBytes(counter);
 			testCodeBlock(rawCodeData, knownGood);
 		}
