@@ -36,5 +36,15 @@ namespace PerfectPaperPasswords
 			}
 			return padedBytes.ToArray();
 		}
+
+		public static string GetHexString(byte[] data)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			for (int i = 0; i < data.Length; i++)
+			{
+				stringBuilder.AppendFormat("{0:x2}", data[i]);
+			}
+			return stringBuilder.ToString();
+		}
 	}
 }
