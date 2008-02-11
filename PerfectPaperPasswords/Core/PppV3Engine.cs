@@ -10,7 +10,53 @@ namespace PerfectPaperPasswords.Core
 {
 	public class PppV3Engine
 	{
+      private static readonly byte[] bits128 = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+		private static readonly BigInteger Int128Max;
+
+		public static string DefaultAlphabet = "!#%+23456789:=?@ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+		public static string ExtendedAlphabet = "!\"#$%&'()*+,-./23456789:;<=>?@ABCDEFGHJKLMNOPRSTUVWXYZ[\\]^_abcdefghijkmnopqrstuvwxyz{|}~";
+
 		#region *** ctors
+		static PppV3Engine()
+		{
+			Int128Max = new BigInteger(bits128);
+		}
+
+		#region Static Factories
+		//Standard
+		public static PppV3Engine BuildStandard(byte[] sequenceKey)
+		{
+			return BuildStandardAlphabet(sequenceKey, 4);
+		}
+
+		public static PppV3Engine BuildStandardAlphabet(byte[] sequenceKey, int passcodeLength)
+		{
+			return new PppV3Engine(sequenceKey, DefaultAlphabet, passcodeLength);
+		}
+
+		//Extended
+		public static PppV3Engine BuildExtendedAlphabet(byte[] sequenceKey)
+		{
+			return BuildExtendedAlphabet(sequenceKey, 4);
+		}
+
+		public static PppV3Engine BuildExtendedAlphabet(byte[] sequenceKey, int passcodeLength)
+		{
+			return new PppV3Engine(sequenceKey, ExtendedAlphabet, passcodeLength);
+		}
+
+		//Custom
+		public static PppV3Engine BuildCustom(byte[] sequenceKey, string alphabet)
+		{
+			return BuildCustom(sequenceKey, alphabet, 4); ;
+		}
+
+		public static PppV3Engine BuildCustom(byte[] sequenceKey, string alphabet, int passcodeLength)
+		{
+			return new PppV3Engine(sequenceKey, alphabet, passcodeLength);
+		}
+		#endregion //Static Factories
+
 		public PppV3Engine(byte[] sequenceKey, string alphabet)
 			: this(sequenceKey, alphabet, 4)
 		{
@@ -121,6 +167,9 @@ namespace PerfectPaperPasswords.Core
 		/// <returns></returns>
 		public string GetPasscode(BigInteger passcodeOrdinal)
 		{
+			if (passcodeOrdinal > Int128Max)
+				throw new ArgumentOutOfRangeException("passcodeOrdinal", String.Format("Passcode Ordinals can not exceed 128 bits!", string.Empty));
+
 			byte[] crypto = GetCryptoBlockForCounter(_sequenceKey, passcodeOrdinal);
 			StringBuilder passcode = new StringBuilder(_passcodeLength);
 			BigInteger working = new BigInteger(crypto);
@@ -199,8 +248,7 @@ namespace PerfectPaperPasswords.Core
 		/// <param name="alphabetLength"></param>
 		/// <returns></returns>
 		public static int CalculateMaxPasscodeLength(int alphabetLength)
-		{
-			byte[] bits128 = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+		{			
 			BigInteger allBits = new BigInteger(bits128);
 			int blocks = 0;
 			while (allBits > alphabetLength)

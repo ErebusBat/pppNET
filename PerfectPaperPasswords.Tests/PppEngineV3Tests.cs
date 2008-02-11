@@ -15,32 +15,19 @@ namespace PerfectPaperPasswords.Tests
 	{
 		PppV3Engine ppp;
 		//zombie = 49460b7bbbd3aad3f2cba09864f5e8b01a220ea8c077e9fa996de367e7984af0
-		byte[] sequenceKey = pppHelper.GetSequenceKeyFromPassword("zombie");
-		string alphabet = "!#%+23456789:=?@ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
-		#region helper
-		private void testCodeBlock(char[] actualCodeBlock, string[] knownGood)
-		{
-			int index = 0;
-			int codeLength = knownGood[0].Length;
-			for (int i = 0; i < knownGood.Length; i++)
-			{
-				StringBuilder code = new StringBuilder();
-				for (int offset = 0; offset < codeLength; offset++)
-				{
-					code.Append(actualCodeBlock[index + offset]);
-				}
-				Assert.AreEqual(knownGood[i], code.ToString(), "Code mismatch @ {0:0,0}", i);
-				index += codeLength;
-			}
-		}
-		#endregion //helper
-
+		byte[] sequenceKey = pppHelper.GetSequenceKeyFromPassword("zombie");		
+				
 		[SetUp]
 		public void Setup()
 		{
-			Assert.AreEqual(64, alphabet.Length, "Alphabet Length Mismatch!");
-			ppp = new PppV3Engine(sequenceKey, alphabet);
+			ppp = PppV3Engine.BuildStandard(sequenceKey);
+		}
+
+		[Test]
+		public void StandardAlphabet()
+		{
+			string expected = "!#%+23456789:=?@ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+			Assert.AreEqual(expected, PppV3Engine.DefaultAlphabet);
 		}
 
 		#region old
@@ -193,6 +180,13 @@ namespace PerfectPaperPasswords.Tests
 		[Test]
 		public void Card_CrossInt32Boundry()
 		{
+			//When this test was written is was overlooked that we are generating by
+			//CARD, not ordinal, therefore all three tests will be past the Int32
+			//boundry, which is fine and still serves the purposes of the test. However
+			//it was the original intention for the first test to pass and the next two
+			//to fail if there were indeed a problem with numbers >32bit. But as we are 
+			//generating by card the first ordinal is ~70x bigger than int.Max anyway.
+
 			//int.maxValue = 2147483647
 			BigInteger cardNumber = BigInteger.Parse(int.MaxValue.ToString());
 
@@ -220,5 +214,35 @@ namespace PerfectPaperPasswords.Tests
 			AssertEqual(knownGood, actual, String.Format("Mismatch on card #{0:#,0}", cardNumber));
 		}
 		#endregion //Card Based
+
+		[Test]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void OrdinalsNoGreaterThan128Bits()
+		{			
+			//128.Max=340282366920938463463374607431768211455
+			BigInteger number;
+			string code;
+
+			// TODO: These first two tests should be moved to their own, and verified
+			//aginst actual known vectors when those become available.
+
+			//128bits-1
+			number = BigInteger.Parse("340282366920938463463374607431768211454");
+			code = ppp.GetPasscode(number);
+			Assert.IsFalse(string.IsNullOrEmpty(code), "Got null code for one off 128 bits!");
+			Assert.AreEqual(4, code.Length, "Code length was not 4!");
+
+			//Now 128bits which should still work
+			number += 1;
+			code = ppp.GetPasscode(number);
+			Assert.IsFalse(string.IsNullOrEmpty(code), "Got null code for one off 128 bits!");
+			Assert.AreEqual(4, code.Length, "Code length was not 4!");
+
+			//Now 128bits+1 which should fail
+			number = BigInteger.Parse("340282366920938463463374607431768211456");
+			code = ppp.GetPasscode(number);
+			//Shouldn't get here
+		}		
 	}
+
 }

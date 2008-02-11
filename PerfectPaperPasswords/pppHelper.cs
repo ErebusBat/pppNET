@@ -37,7 +37,7 @@ namespace PerfectPaperPasswords
 			return padedBytes.ToArray();
 		}
 
-		public static string GetHexString(byte[] data)
+		public static string BytesToHexString(byte[] data)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			for (int i = 0; i < data.Length; i++)
@@ -45,6 +45,23 @@ namespace PerfectPaperPasswords
 				stringBuilder.AppendFormat("{0:x2}", data[i]);
 			}
 			return stringBuilder.ToString();
+		}
+
+		public static byte[] HexStringToBytes(string hex)
+		{
+			if (string.IsNullOrEmpty(hex))
+				throw new ArgumentNullException("hex");
+			if (hex.Length % 2 != 0)
+				throw new ArgumentOutOfRangeException("hex", "String must contain an even number of digits!");
+
+			byte[] data = new byte[hex.Length / 2];
+			for (int i = 0; i < data.Length; i++)
+			{
+				string byteData = hex.Substring(i * 2, 2);
+				data[i] = Convert.ToByte(byteData, 16);
+			}
+
+			return data;
 		}
 	}
 }
