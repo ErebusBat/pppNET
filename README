@@ -1,0 +1,5 @@
+This is the same pppNET project/source/author from http://sourceforge.net/projects/pppnet/
+
+I chose to move the source hosting from SF to GitHub mainly because after using GIT professionally for almost three years I can not stand using SVN anymore.
+
+The pppNET GIT repo contains all the SVN code through revision 9.  r10 will contain a 'delete' with a readme that points to GitHub.
